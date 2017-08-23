@@ -2,7 +2,7 @@
 
 namespace Entity;
 
-abstract class AbstractUser
+abstract class AbstractUser implements EntityInterface
 {
     /**
      * @var bool
