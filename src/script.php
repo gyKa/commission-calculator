@@ -21,7 +21,7 @@ $csvRows = array_map('str_getcsv', file($argv[1]));
 
 foreach ($csvRows as $csvRow) {
     $user = $userRepository->findOrCreate((int)$csvRow[1], $csvRow[2]);
-    $operation = $operationRepository->create($csvRow[0], $csvRow[3], $csvRow[4], $csvRow[5]);
+    $operation = $operationRepository->create($csvRow[0], $csvRow[3], $csvRow[4], $csvRow[5], $user);
 }
 
 $exchangeService->calculateRate(10, 'USD');
