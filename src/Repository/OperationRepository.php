@@ -63,4 +63,12 @@ class OperationRepository
 
         return $operation;
     }
+
+    /**
+     * @return array
+     */
+    public function getAll()
+    {
+        return $this->persistence->findAll('operation');
+    }
 }

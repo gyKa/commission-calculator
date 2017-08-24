@@ -31,6 +31,19 @@ class MemoryPersistence implements PersistenceInterface
 
     /**
      * @param string $location
+     * @return array
+     */
+    public function findAll(string $location) : array
+    {
+        if (!array_key_exists($location, $this->data)) {
+            $this->data[$location] = [];
+        }
+
+        return $this->data[$location];
+    }
+
+    /**
+     * @param string $location
      * @param EntityInterface $entity
      * @param int|null $id
      */

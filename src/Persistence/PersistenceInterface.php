@@ -15,6 +15,12 @@ interface PersistenceInterface
 
     /**
      * @param string $location
+     * @return array
+     */
+    public function findAll(string $location) : array;
+
+    /**
+     * @param string $location
      * @param EntityInterface $entity
      * @param int|null $id
      */

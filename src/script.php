@@ -24,4 +24,6 @@ foreach ($csvRows as $csvRow) {
     $operation = $operationRepository->create($csvRow[0], $csvRow[3], $csvRow[4], $csvRow[5], $user);
 }
 
+$operations = $operationRepository->getAll();
+
 $exchangeService->calculateRate(10, 'USD');

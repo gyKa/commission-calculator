@@ -113,5 +113,4 @@ class AbstractOperation implements EntityInterface
     {
         $this->user = $user;
     }
-
 }
