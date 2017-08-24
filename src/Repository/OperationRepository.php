@@ -70,8 +70,33 @@ class OperationRepository
     /**
      * @return array
      */
-    public function getAll()
+    public function getAll() : array
     {
         return $this->persistence->findAll('operation');
+    }
+
+    /**
+     * @param \DateTime $date
+     * @return array
+     */
+    public function getWeekOperations(\DateTime $date) : array
+    {
+        $result = [];
+        $currentWeek = $date->format('W');
+
+        $operations = $this->persistence->findAll('operation');
+
+        /**
+         * @var AbstractOperation $operation
+         */
+        foreach ($operations as $operation) {
+            $operationWeek = $operation->getDate()->format('W');
+
+            if ($operationWeek === $currentWeek) {
+                $result[] = $operation;
+            }
+        }
+
+        return $result;
     }
 }
