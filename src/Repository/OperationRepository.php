@@ -24,6 +24,7 @@ class OperationRepository
     }
 
     /**
+     * @param int $id
      * @param string $date
      * @param string $operationType
      * @param string $amount
@@ -32,6 +33,7 @@ class OperationRepository
      * @return AbstractOperation
      */
     public function create(
+        int $id,
         string $date,
         string $operationType,
         string $amount,
@@ -54,7 +56,8 @@ class OperationRepository
             $amount = str_replace('.', '', $amount);
         }
 
-        $operation->setDate(\DateTime::createFromFormat('Y-m-d', $date));
+        $operation->setId($id);
+        $operation->setDate(\DateTime::createFromFormat(DATE_FORMAT, $date));
         $operation->setAmount($amount);
         $operation->setCurrency($currency);
         $operation->setUser($user);

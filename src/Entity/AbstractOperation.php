@@ -15,6 +15,11 @@ class AbstractOperation implements EntityInterface
     protected $isCashInOperation = false;
 
     /**
+     * @var int
+     */
+    protected $id;
+
+    /**
      * @var \DateTime
      */
     protected $date;
@@ -48,6 +53,22 @@ class AbstractOperation implements EntityInterface
     public function isCashInOperation() : bool
     {
         return $this->isCashInOperation;
+    }
+
+    /**
+     * @return int
+     */
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param int $id
+     */
+    public function setId(int $id)
+    {
+        $this->id = $id;
     }
 
     /**
