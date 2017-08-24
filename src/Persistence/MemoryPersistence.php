@@ -16,7 +16,7 @@ class MemoryPersistence implements PersistenceInterface
      * @param string $location
      * @return EntityInterface|null
      */
-    public function find(int $id, string $location) :? EntityInterface
+    public function find(string $location, int $id) :? EntityInterface
     {
         if (!array_key_exists($location, $this->data)) {
             $this->data[$location] = [];
@@ -30,13 +30,17 @@ class MemoryPersistence implements PersistenceInterface
     }
 
     /**
-     * @param int $id
      * @param string $location
      * @param EntityInterface $entity
+     * @param int|null $id
      */
-    public function save(int $id, string $location, EntityInterface $entity) : void
+    public function save(string $location, EntityInterface $entity, int $id = null) : void
     {
-        $this->data[$location][$id] = $entity;
+        if (is_null($id)) {
+            $this->data[$location][] = $entity;
+        } else {
+            $this->data[$location][$id] = $entity;
+        }
     }
 
     /**
@@ -44,7 +48,7 @@ class MemoryPersistence implements PersistenceInterface
      * @param string $location
      * @return bool
      */
-    public function remove(int $id, string $location) : bool
+    public function remove(string $location, int $id) : bool
     {
         if ($this->data[$location][$id]) {
             unset($this->data[$location][$id]);

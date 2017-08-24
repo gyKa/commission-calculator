@@ -3,7 +3,6 @@
 namespace Repository;
 
 use Entity\AbstractUser;
-use Entity\EntityInterface;
 use Entity\LegalUser;
 use Entity\NaturalUser;
 use Persistence\PersistenceInterface;
@@ -29,7 +28,7 @@ class UserRepository
      */
     public function find(int $id) :? AbstractUser
     {
-        return $this->persistence->find($id, 'user');
+        return $this->persistence->find('user', $id);
     }
 
     /**
@@ -44,14 +43,14 @@ class UserRepository
         switch ($userType) {
             case 'natural':
                 $user = new NaturalUser();
-
                 break;
+
             case 'legal':
                 $user = new LegalUser();
                 break;
         }
 
-        $this->persistence->save($id, 'user', $user);
+        $this->persistence->save('user', $user, $id);
 
         return $user;
     }
@@ -77,6 +76,6 @@ class UserRepository
      */
     public function remove(int $id)
     {
-        $this->persistence->remove($id, 'user');
+        $this->persistence->remove('user', $id);
     }
 }
