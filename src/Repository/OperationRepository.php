@@ -30,6 +30,7 @@ class OperationRepository
      * @param string $amount
      * @param string $currency
      * @param AbstractUser $user
+     * @param DiscountRepository $discountRepository
      * @return AbstractOperation
      */
     public function create(
@@ -38,7 +39,8 @@ class OperationRepository
         string $operationType,
         string $amount,
         string $currency,
-        AbstractUser $user
+        AbstractUser $user,
+        DiscountRepository $discountRepository
     ) : AbstractOperation {
         $operation = null;
 
@@ -58,13 +60,24 @@ class OperationRepository
             $amount *= 100;
         }
 
+        $datetime = \DateTime::createFromFormat(DATE_FORMAT, $date);
+
         $operation->setId($id);
-        $operation->setDate(\DateTime::createFromFormat(DATE_FORMAT, $date));
+        $operation->setDate($datetime);
         $operation->setAmount($amount);
         $operation->setCurrency($currency);
         $operation->setUser($user);
 
         $this->persistence->save('operation', $operation);
+
+        if ($operation->isCashOutOperation() && $user->isNaturalUser()) {
+            $discountRepository->create(
+                $user,
+                $this->getDateWeekStart($datetime),
+                $this->getDateWeekEnd($datetime),
+                100000
+            );
+        }
 
         return $operation;
     }
@@ -87,26 +100,13 @@ class OperationRepository
     {
         $result = [];
 
-        $weekDay = (int)$date->format('w');
-        $weekDay = $weekDay === 0 ? 7 : $weekDay;
-
-        $monday = clone $date;
-        $monday = $monday->modify(
-            sprintf('-%s day', $weekDay - 1)
-        );
-
-        $sunday = clone $date;
-        $sunday = $sunday->modify(
-            sprintf('+%s day', 7 - $weekDay)
-        );
-
         $operations = $this->persistence->findAll('operation');
 
         /**
          * @var AbstractOperation $operation
          */
         foreach ($operations as $operation) {
-            $isInCurrentWeek = $operation->getDate() >= $monday && $operation->getDate() <= $sunday;
+            $isInCurrentWeek = $operation->getDate() >= $this->getDateWeekStart($date) && $operation->getDate() <= $this->getDateWeekEnd($date);
             $isOlderByDate = $operation->getDate() <= $date;
             $isSameUser = $operation->getUser()->getId() === $userId;
             $isOlderInTimeline = $operation->getId() <= $operationId;
@@ -117,5 +117,29 @@ class OperationRepository
         }
 
         return $result;
+    }
+
+    public function getDateWeekStart(\DateTime $date) : \DateTime
+    {
+        $weekDay = (int)$date->format('w');
+        $weekDay = $weekDay === 0 ? 7 : $weekDay;
+
+        $monday = clone $date;
+
+        return $monday->modify(
+            sprintf('-%s day', $weekDay - 1)
+        );
+    }
+
+    public function getDateWeekEnd(\DateTime $date) : \DateTime
+    {
+        $weekDay = (int)$date->format('w');
+        $weekDay = $weekDay === 0 ? 7 : $weekDay;
+
+        $sunday = clone $date;
+
+        return $sunday->modify(
+            sprintf('+%s day', 7 - $weekDay)
+        );
     }
 }
