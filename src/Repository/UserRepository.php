@@ -50,6 +50,8 @@ class UserRepository
                 break;
         }
 
+        $user->setId($id);
+
         $this->persistence->save('user', $user, $id);
 
         return $user;
