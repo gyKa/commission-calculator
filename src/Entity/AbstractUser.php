@@ -5,6 +5,11 @@ namespace Entity;
 abstract class AbstractUser implements EntityInterface
 {
     /**
+     * @var int
+     */
+    protected $id;
+
+    /**
      * @var bool
      */
     protected $isLegalUser = false;
@@ -13,6 +18,22 @@ abstract class AbstractUser implements EntityInterface
      * @var bool
      */
     protected $isNaturalUser = false;
+
+    /**
+     * @return int
+     */
+    public function getId() : int
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param int $id
+     */
+    public function setId(int $id)
+    {
+        $this->id = $id;
+    }
 
     /**
      * @return bool
