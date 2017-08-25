@@ -4,8 +4,6 @@ namespace Repository;
 
 use Entity\AbstractUser;
 use Entity\Discount;
-use Entity\LegalUser;
-use Entity\NaturalUser;
 use Persistence\PersistenceInterface;
 
 class DiscountRepository
@@ -25,9 +23,10 @@ class DiscountRepository
 
     /**
      * @param int $userId
+     * @param \DateTime $date
      * @return Discount|null
      */
-    public function find(int $userId) :? Discount
+    public function find(int $userId, \DateTime $date) :? Discount
     {
         $discounts = $this->persistence->findAll('discount');
 
@@ -35,7 +34,7 @@ class DiscountRepository
          * @var Discount $discount
          */
         foreach ($discounts as $discount) {
-            if ($discount->getUser()->getId() === $userId) {
+            if ($discount->getUser()->getId() === $userId && $discount->isInPeriod($date)) {
                 return $discount;
             }
         }
