@@ -49,6 +49,10 @@ class Discount implements EntityInterface
         return $dateTime >= $this->periodStartDate && $dateTime <= $this->periodEndDate;
     }
 
+    /**
+     * @param int $amount
+     * @return int
+     */
     public function useDiscount(int $amount) : int
     {
         if ($this->amount === 0) {
