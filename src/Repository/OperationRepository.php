@@ -54,6 +54,8 @@ class OperationRepository
 
         if (strpos($amount, '.') !== false) {
             $amount = str_replace('.', '', $amount);
+        } else {
+            $amount *= 100;
         }
 
         $operation->setId($id);
@@ -77,12 +79,26 @@ class OperationRepository
 
     /**
      * @param \DateTime $date
+     * @param int $userId
+     * @param int $operationId
      * @return array
      */
-    public function getWeekOperations(\DateTime $date) : array
+    public function getWeekOperations(\DateTime $date, int $userId, int $operationId) : array
     {
         $result = [];
-        $currentWeek = $date->format('W');
+
+        $weekDay = (int)$date->format('w');
+        $weekDay = $weekDay === 0 ? 7 : $weekDay;
+
+        $monday = clone $date;
+        $monday = $monday->modify(
+            sprintf('-%s day', $weekDay - 1)
+        );
+
+        $sunday = clone $date;
+        $sunday = $sunday->modify(
+            sprintf('+%s day', 7 - $weekDay)
+        );
 
         $operations = $this->persistence->findAll('operation');
 
@@ -90,9 +106,12 @@ class OperationRepository
          * @var AbstractOperation $operation
          */
         foreach ($operations as $operation) {
-            $operationWeek = $operation->getDate()->format('W');
+            $isInCurrentWeek = $operation->getDate() >= $monday && $operation->getDate() <= $sunday;
+            $isOlderByDate = $operation->getDate() <= $date;
+            $isSameUser = $operation->getUser()->getId() === $userId;
+            $isOlderInTimeline = $operation->getId() <= $operationId;
 
-            if ($operationWeek === $currentWeek) {
+            if ($isInCurrentWeek && $isOlderByDate && $operation->isCashOutOperation() && $isSameUser && $isOlderInTimeline) {
                 $result[] = $operation;
             }
         }
