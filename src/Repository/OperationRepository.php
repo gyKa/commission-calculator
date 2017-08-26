@@ -106,12 +106,14 @@ class OperationRepository
          * @var AbstractOperation $operation
          */
         foreach ($operations as $operation) {
-            $isInCurrentWeek = $operation->getDate() >= $this->getDateWeekStart($date) && $operation->getDate() <= $this->getDateWeekEnd($date);
+            $isInCurrentWeek = $operation->getDate() >= $this->getDateWeekStart($date) &&
+                $operation->getDate() <= $this->getDateWeekEnd($date);
             $isOlderByDate = $operation->getDate() <= $date;
             $isSameUser = $operation->getUser()->getId() === $userId;
             $isOlderInTimeline = $operation->getId() <= $operationId;
+            $isOlder = $isOlderByDate && $isOlderInTimeline;
 
-            if ($isInCurrentWeek && $isOlderByDate && $operation->isCashOutOperation() && $isSameUser && $isOlderInTimeline) {
+            if ($isInCurrentWeek && $isOlder && $operation->isCashOutOperation() && $isSameUser) {
                 $result[] = $operation;
             }
         }
