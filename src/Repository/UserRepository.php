@@ -76,7 +76,7 @@ class UserRepository
     /**
      * @param int $id
      */
-    public function remove(int $id)
+    public function remove(int $id) : void
     {
         $this->persistence->remove('user', $id);
     }
