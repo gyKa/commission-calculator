@@ -16,6 +16,8 @@ class CommissionCalculationService
     const OPERATION_CASH_OUT_COMMISSION_PERCENTAGE = 0.3;
     const OPERATION_CASH_IN_COMMISSION_PERCENTAGE = 0.03;
 
+    const WEEKLY_OPERATION_LIMIT_FOR_DISCOUNT = 3;
+
     /**
      * @var OperationRepository
      */
@@ -151,6 +153,8 @@ class CommissionCalculationService
     }
 
     /**
+     * Improved ceil() alternative with precision support.
+     *
      * @param $value
      * @param int $precision
      * @return float
@@ -166,7 +170,7 @@ class CommissionCalculationService
      */
     private function maybeApplyDiscount(int $weekOperationsCounter, AbstractOperation $operation) : void
     {
-        if ($weekOperationsCounter >= 4) {
+        if ($weekOperationsCounter > self::WEEKLY_OPERATION_LIMIT_FOR_DISCOUNT) {
             return;
         }
 
@@ -185,16 +189,16 @@ class CommissionCalculationService
      */
     private function maybeApplyRegularCommission(int $weekOperationsCounter, AbstractOperation $operation) : void
     {
-        if ($weekOperationsCounter <= 3) {
+        if ($weekOperationsCounter <= self::WEEKLY_OPERATION_LIMIT_FOR_DISCOUNT) {
             return;
         }
 
-        $comm = $this->exchangeService->calculateRate(
+        $commission = $this->exchangeService->calculateRate(
             $operation->getAmount() / 100,
             $operation->getCurrency()
         );
 
-        $this->commission = $comm * self::OPERATION_CASH_OUT_COMMISSION_PERCENTAGE;
+        $this->commission = $commission * self::OPERATION_CASH_OUT_COMMISSION_PERCENTAGE;
     }
 
     /**
@@ -218,16 +222,14 @@ class CommissionCalculationService
 
         if ($unusedAmount === 0) {
             $this->commission = 0;
-        }
-
-        if ($unusedAmount > 0) {
-            $comm = $this->exchangeService->calculateRate(
+        } else {
+            $commission = $this->exchangeService->calculateRate(
                 $unusedAmount / 100,
                 $operation->getCurrency(),
                 DEFAULT_CURRENCY
             );
 
-            $this->commission = $comm * self::OPERATION_CASH_OUT_COMMISSION_PERCENTAGE;
+            $this->commission = $commission * self::OPERATION_CASH_OUT_COMMISSION_PERCENTAGE;
         }
     }
 
