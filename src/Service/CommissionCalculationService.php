@@ -31,6 +31,9 @@ class CommissionCalculationService
      */
     protected $exchangeService;
 
+    /**
+     * @var int
+     */
     private $commission;
 
     /**
@@ -51,13 +54,16 @@ class CommissionCalculationService
     /**
      * @param AbstractOperation $operation
      */
-    public function calculate(AbstractOperation $operation)
+    public function calculate(AbstractOperation $operation) : void
     {
         $this->calculateForCashIn($operation);
         $this->calculateForCashOut($operation);
     }
 
-    public function getFormattedCommission()
+    /**
+     * @return string
+     */
+    public function getFormattedCommission() : string
     {
         return number_format(
             $this->commission / 100,
@@ -65,7 +71,10 @@ class CommissionCalculationService
         );
     }
 
-    protected function calculateForCashIn(AbstractOperation $operation)
+    /**
+     * @param AbstractOperation $operation
+     */
+    protected function calculateForCashIn(AbstractOperation $operation) : void
     {
         if (!$operation->isCashInOperation()) {
             return;
@@ -84,7 +93,10 @@ class CommissionCalculationService
         $this->commission = $commission;
     }
 
-    protected function calculateForCashOut(AbstractOperation $operation)
+    /**
+     * @param AbstractOperation $operation
+     */
+    protected function calculateForCashOut(AbstractOperation $operation) : void
     {
         if (!$operation->isCashOutOperation()) {
             return;
@@ -94,7 +106,10 @@ class CommissionCalculationService
         $this->calculateForCashOutNaturalUser($operation);
     }
 
-    protected function calculateForCashOutLegalUser(AbstractOperation $operation)
+    /**
+     * @param AbstractOperation $operation
+     */
+    protected function calculateForCashOutLegalUser(AbstractOperation $operation) : void
     {
         if (!($operation->getUser())->isLegalUser()) {
             return;
@@ -113,7 +128,10 @@ class CommissionCalculationService
         $this->commission = $commission;
     }
 
-    protected function calculateForCashOutNaturalUser(AbstractOperation $operation)
+    /**
+     * @param AbstractOperation $operation
+     */
+    protected function calculateForCashOutNaturalUser(AbstractOperation $operation) : void
     {
         if (!($operation->getUser())->isNaturalUser()) {
             return;
@@ -129,11 +147,20 @@ class CommissionCalculationService
         $this->maybeApplyRegularCommission($weekOperations, $operation);
     }
 
-    private function ceiling($value, $precision = 0)
+    /**
+     * @param $value
+     * @param int $precision
+     * @return float
+     */
+    private function ceiling($value, int $precision = 0) : float
     {
         return ceil($value * pow(10, $precision)) / pow(10, $precision);
     }
 
+    /**
+     * @param array $weekOperations
+     * @param AbstractOperation $operation
+     */
     private function maybeApplyDiscount(array $weekOperations, AbstractOperation $operation) : void
     {
         if (count($weekOperations) >= 4) {
@@ -149,6 +176,10 @@ class CommissionCalculationService
         $this->maybeUserHasNotDiscount($discount, $operation);
     }
 
+    /**
+     * @param array $weekOperations
+     * @param AbstractOperation $operation
+     */
     private function maybeApplyRegularCommission(array $weekOperations, AbstractOperation $operation) : void
     {
         if (count($weekOperations) <= 3) {
@@ -163,7 +194,11 @@ class CommissionCalculationService
         $this->commission = $comm * self::OPERATION_CASH_OUT_COMMISSION_PERCENTAGE;
     }
 
-    private function maybeUserHasDiscount(Discount $discount, AbstractOperation $operation)
+    /**
+     * @param Discount $discount
+     * @param AbstractOperation $operation
+     */
+    private function maybeUserHasDiscount(Discount $discount, AbstractOperation $operation) : void
     {
         if (is_null($discount)) {
             return;
@@ -193,7 +228,11 @@ class CommissionCalculationService
         }
     }
 
-    private function maybeUserHasNotDiscount(Discount $discount, AbstractOperation $operation)
+    /**
+     * @param Discount $discount
+     * @param AbstractOperation $operation
+     */
+    private function maybeUserHasNotDiscount(Discount $discount, AbstractOperation $operation) : void
     {
         if (!is_null($discount)) {
             return;
