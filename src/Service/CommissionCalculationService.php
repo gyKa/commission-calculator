@@ -112,51 +112,65 @@ class CommissionCalculationService
             $operation->getId()
         );
 
-        if (count($weekOperations) <= 3) {
-            $discount = $this->discountRepository->find(
-                $operation->getUser()->getId(),
-                $operation->getDate()
-            );
-
-            if (!is_null($discount)) {
-                $convertedAmountFloat = $this->exchangeService->calculateRate(
-                    $operation->getAmount() / 100,
-                    DEFAULT_CURRENCY,
-                    $operation->getCurrency()
-                );
-
-                $convertedAmountInt = $this->ceiling($convertedAmountFloat, 2) * 100;
-                $unusedAmount = $discount->useDiscount($convertedAmountInt);
-
-                if ($unusedAmount === 0) {
-                    $this->commission = 0;
-                    return;
-                }
-
-                if ($unusedAmount > 0) {
-                    $comm = $this->exchangeService->calculateRate(
-                        $unusedAmount / 100,
-                        $operation->getCurrency(),
-                        DEFAULT_CURRENCY
-                    );
-
-                    $this->commission = $comm * 0.3;
-                    return;
-                }
-            }
-        } else {
-            $comm = $this->exchangeService->calculateRate(
-                $operation->getAmount() / 100,
-                $operation->getCurrency()
-            );
-
-            $this->commission = $comm * 0.3;
-            return;
-        }
+        $this->maybeApplyDiscount($weekOperations, $operation);
+        $this->maybeApplyRegularCommission($weekOperations, $operation);
     }
 
     private function ceiling($value, $precision = 0)
     {
         return ceil($value * pow(10, $precision)) / pow(10, $precision);
+    }
+
+    private function maybeApplyDiscount(array $weekOperations, AbstractOperation $operation) : void
+    {
+        if (count($weekOperations) >= 4) {
+            return;
+        }
+
+        $discount = $this->discountRepository->find(
+            $operation->getUser()->getId(),
+            $operation->getDate()
+        );
+
+        if (!is_null($discount)) {
+            $convertedAmountFloat = $this->exchangeService->calculateRate(
+                $operation->getAmount() / 100,
+                DEFAULT_CURRENCY,
+                $operation->getCurrency()
+            );
+
+            $convertedAmountInt = $this->ceiling($convertedAmountFloat, 2) * 100;
+            $unusedAmount = $discount->useDiscount($convertedAmountInt);
+
+            if ($unusedAmount === 0) {
+                $this->commission = 0;
+                return;
+            }
+
+            if ($unusedAmount > 0) {
+                $comm = $this->exchangeService->calculateRate(
+                    $unusedAmount / 100,
+                    $operation->getCurrency(),
+                    DEFAULT_CURRENCY
+                );
+
+                $this->commission = $comm * 0.3;
+                return;
+            }
+        }
+    }
+
+    private function maybeApplyRegularCommission(array $weekOperations, AbstractOperation $operation) : void
+    {
+        if (count($weekOperations) <= 3) {
+            return;
+        }
+
+        $comm = $this->exchangeService->calculateRate(
+            $operation->getAmount() / 100,
+            $operation->getCurrency()
+        );
+
+        $this->commission = $comm * 0.3;
     }
 }
