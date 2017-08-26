@@ -3,6 +3,7 @@
 namespace Service;
 
 use Entity\AbstractOperation;
+use Entity\Discount;
 use Repository\DiscountRepository;
 use Repository\OperationRepository;
 use Service\Currency\ExchangeService;
@@ -132,32 +133,8 @@ class CommissionCalculationService
             $operation->getDate()
         );
 
-        if (!is_null($discount)) {
-            $convertedAmountFloat = $this->exchangeService->calculateRate(
-                $operation->getAmount() / 100,
-                DEFAULT_CURRENCY,
-                $operation->getCurrency()
-            );
-
-            $convertedAmountInt = $this->ceiling($convertedAmountFloat, 2) * 100;
-            $unusedAmount = $discount->useDiscount($convertedAmountInt);
-
-            if ($unusedAmount === 0) {
-                $this->commission = 0;
-                return;
-            }
-
-            if ($unusedAmount > 0) {
-                $comm = $this->exchangeService->calculateRate(
-                    $unusedAmount / 100,
-                    $operation->getCurrency(),
-                    DEFAULT_CURRENCY
-                );
-
-                $this->commission = $comm * 0.3;
-                return;
-            }
-        }
+        $this->maybeUserHasDiscount($discount, $operation);
+        $this->maybeUserHasNotDiscount($discount, $operation);
     }
 
     private function maybeApplyRegularCommission(array $weekOperations, AbstractOperation $operation) : void
@@ -172,5 +149,48 @@ class CommissionCalculationService
         );
 
         $this->commission = $comm * 0.3;
+    }
+
+    private function maybeUserHasDiscount(Discount $discount, AbstractOperation $operation)
+    {
+        if (is_null($discount)) {
+            return;
+        }
+
+        $convertedAmountFloat = $this->exchangeService->calculateRate(
+            $operation->getAmount() / 100,
+            DEFAULT_CURRENCY,
+            $operation->getCurrency()
+        );
+
+        $convertedAmountInt = $this->ceiling($convertedAmountFloat, 2) * 100;
+        $unusedAmount = $discount->useDiscount($convertedAmountInt);
+
+        if ($unusedAmount === 0) {
+            $this->commission = 0;
+        }
+
+        if ($unusedAmount > 0) {
+            $comm = $this->exchangeService->calculateRate(
+                $unusedAmount / 100,
+                $operation->getCurrency(),
+                DEFAULT_CURRENCY
+            );
+
+            $this->commission = $comm * 0.3;
+        }
+    }
+
+    private function maybeUserHasNotDiscount(Discount $discount, AbstractOperation $operation)
+    {
+        if (!is_null($discount)) {
+            return;
+        }
+
+        $this->commission = $this->exchangeService->calculateRate(
+            $operation->getAmount() / 100,
+            $operation->getCurrency(),
+            DEFAULT_CURRENCY
+        ) * 0.3;
     }
 }
