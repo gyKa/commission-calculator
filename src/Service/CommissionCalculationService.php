@@ -67,7 +67,11 @@ class CommissionCalculationService
         $commission = $operation->getAmount() / 100 * 0.03;
         $commissionInEur = $this->exchangeService->calculateRate($commission, DEFAULT_CURRENCY);
 
-        $this->commission = $commissionInEur > 500 ? $this->exchangeService->calculateRate(500, $operation->getCurrency()) : $commission;
+        if ($commissionInEur > 500) {
+            $commission = $this->exchangeService->calculateRate(500, $operation->getCurrency());
+        }
+
+        $this->commission = $commission;
     }
 
     protected function calculateForCashOut(AbstractOperation $operation)
@@ -89,8 +93,11 @@ class CommissionCalculationService
         $commission = $operation->getAmount() / 100 * 0.3;
         $commissionInEur = $this->exchangeService->calculateRate($commission, DEFAULT_CURRENCY);
 
-        $this->commission = $commissionInEur <= 50 ? $this->exchangeService->calculateRate(500, $operation->getCurrency()) : $commission;
+        if ($commissionInEur <= 50) {
+            $commission = $this->exchangeService->calculateRate(500, $operation->getCurrency());
+        }
 
+        $this->commission = $commission;
     }
 
     protected function calculateForCashOutNaturalUser(AbstractOperation $operation)
@@ -148,7 +155,8 @@ class CommissionCalculationService
         }
     }
 
-    private function ceiling($value, $precision = 0) {
+    private function ceiling($value, $precision = 0)
+    {
         return ceil($value * pow(10, $precision)) / pow(10, $precision);
     }
 }
