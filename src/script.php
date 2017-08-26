@@ -19,9 +19,15 @@ $discountRepository = new DiscountRepository($memoryPersistence);
 
 $ratesService = new RatesService();
 $exchangeService = new ExchangeService($ratesService, DEFAULT_CURRENCY);
+$commissionCalculatorService = new CommissionCalculationService(
+    $operationRepository,
+    $discountRepository,
+    $exchangeService
+);
 
 $csvRows = array_map('str_getcsv', file($argv[1]));
 
+// Set up and store operation and user entities.
 foreach ($csvRows as $index => $csvRow) {
     $user = $userRepository->findOrCreate((int)$csvRow[1], $csvRow[2]);
     $operation = $operationRepository->create(
@@ -35,16 +41,11 @@ foreach ($csvRows as $index => $csvRow) {
     );
 }
 
-$commissionCalculatorService = new CommissionCalculationService(
-    $operationRepository,
-    $discountRepository,
-    $exchangeService
-);
-
 $operations = $operationRepository->getAll();
 
+// Calculate commission for operations.
 foreach ($operations as $operation) {
     $commissionCalculatorService->calculate($operation);
 
-    echo $commissionCalculatorService->getFormattedCommission($operation) . PHP_EOL;
+    fwrite(STDOUT, $commissionCalculatorService->getFormattedCommission($operation) . PHP_EOL);
 }
