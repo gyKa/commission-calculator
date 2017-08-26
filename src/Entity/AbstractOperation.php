@@ -40,6 +40,11 @@ class AbstractOperation implements EntityInterface
     protected $user;
 
     /**
+     * @var int
+     */
+    protected $amountPrecise;
+
+    /**
      * @return bool
      */
     public function isCashOutOperation() : bool
@@ -133,5 +138,21 @@ class AbstractOperation implements EntityInterface
     public function setUser(AbstractUser $user)
     {
         $this->user = $user;
+    }
+
+    /**
+     * @return int
+     */
+    public function getAmountPrecise(): int
+    {
+        return $this->amountPrecise;
+    }
+
+    /**
+     * @param int $amountPrecise
+     */
+    public function setAmountPrecise(int $amountPrecise)
+    {
+        $this->amountPrecise = $amountPrecise;
     }
 }

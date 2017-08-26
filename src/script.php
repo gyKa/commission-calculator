@@ -45,5 +45,6 @@ $operations = $operationRepository->getAll();
 
 foreach ($operations as $operation) {
     $commissionCalculatorService->calculate($operation);
-    echo $commissionCalculatorService->getFormattedCommission() . PHP_EOL;
+
+    echo $commissionCalculatorService->getFormattedCommission($operation) . PHP_EOL;
 }

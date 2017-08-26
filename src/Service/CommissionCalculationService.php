@@ -61,13 +61,16 @@ class CommissionCalculationService
     }
 
     /**
+     * @param AbstractOperation $operation
      * @return string
      */
-    public function getFormattedCommission() : string
+    public function getFormattedCommission(AbstractOperation $operation) : string
     {
         return number_format(
             $this->commission / 100,
-            2
+            $operation->getAmountPrecise(),
+            '.',
+            ''
         );
     }
 

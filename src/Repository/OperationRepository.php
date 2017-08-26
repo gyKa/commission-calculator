@@ -56,7 +56,9 @@ class OperationRepository
 
         if (strpos($amount, '.') !== false) {
             $amount = str_replace('.', '', $amount);
+            $operation->setAmountPrecise(2);
         } else {
+            $operation->setAmountPrecise(0);
             $amount *= 100;
         }
 
@@ -70,6 +72,7 @@ class OperationRepository
 
         $this->persistence->save('operation', $operation);
 
+        // Create discount.
         if ($operation->isCashOutOperation() && $user->isNaturalUser()) {
             $discountRepository->create(
                 $user,
@@ -121,6 +124,10 @@ class OperationRepository
         return $result;
     }
 
+    /**
+     * @param \DateTime $date
+     * @return \DateTime
+     */
     public function getDateWeekStart(\DateTime $date) : \DateTime
     {
         $weekDay = (int)$date->format('w');
@@ -133,6 +140,10 @@ class OperationRepository
         );
     }
 
+    /**
+     * @param \DateTime $date
+     * @return \DateTime
+     */
     public function getDateWeekEnd(\DateTime $date) : \DateTime
     {
         $weekDay = (int)$date->format('w');
