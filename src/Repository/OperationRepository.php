@@ -54,6 +54,7 @@ class OperationRepository
                 break;
         }
 
+        // Set up operation precise.
         if (strpos($amount, '.') !== false) {
             $amount = str_replace('.', '', $amount);
             $operation->setAmountPrecise(2);

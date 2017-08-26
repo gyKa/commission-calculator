@@ -55,16 +55,19 @@ class Discount implements EntityInterface
      */
     public function useDiscount(int $amount) : int
     {
+        // If there is nothing to use, return original amount.
         if ($this->amount === 0) {
             return $amount;
         }
 
+        // If discount is bigger, use all original amount and return 0 as unused amount.
         if ($this->amount >= $amount) {
             $this->amount -= $amount;
 
             return 0;
         }
 
+        // Otherwise use discount partly and return what is left.
         $amount -= $this->amount;
         $this->amount = 0;
 
