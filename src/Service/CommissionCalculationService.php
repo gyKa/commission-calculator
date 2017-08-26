@@ -10,6 +10,12 @@ use Service\Currency\ExchangeService;
 
 class CommissionCalculationService
 {
+    const MAXIMUM_CASH_IN_COMMISSION_AMOUNT = 500;
+    const MINIMUM_CASH_OUT_COMMISSION_AMOUNT = 50;
+
+    const OPERATION_CASH_OUT_COMMISSION_PERCENTAGE = 0.3;
+    const OPERATION_CASH_IN_COMMISSION_PERCENTAGE = 0.03;
+
     /**
      * @var OperationRepository
      */
@@ -65,11 +71,14 @@ class CommissionCalculationService
             return;
         }
 
-        $commission = $operation->getAmount() / 100 * 0.03;
+        $commission = $operation->getAmount() / 100 * self::OPERATION_CASH_IN_COMMISSION_PERCENTAGE;
         $commissionInEur = $this->exchangeService->calculateRate($commission, DEFAULT_CURRENCY);
 
-        if ($commissionInEur > 500) {
-            $commission = $this->exchangeService->calculateRate(500, $operation->getCurrency());
+        if ($commissionInEur > self::MAXIMUM_CASH_IN_COMMISSION_AMOUNT) {
+            $commission = $this->exchangeService->calculateRate(
+                self::MAXIMUM_CASH_IN_COMMISSION_AMOUNT,
+                $operation->getCurrency()
+            );
         }
 
         $this->commission = $commission;
@@ -91,11 +100,14 @@ class CommissionCalculationService
             return;
         }
 
-        $commission = $operation->getAmount() / 100 * 0.3;
+        $commission = $operation->getAmount() / 100 * self::OPERATION_CASH_OUT_COMMISSION_PERCENTAGE;
         $commissionInEur = $this->exchangeService->calculateRate($commission, DEFAULT_CURRENCY);
 
-        if ($commissionInEur <= 50) {
-            $commission = $this->exchangeService->calculateRate(500, $operation->getCurrency());
+        if ($commissionInEur <= self::MINIMUM_CASH_OUT_COMMISSION_AMOUNT) {
+            $commission = $this->exchangeService->calculateRate(
+                self::MINIMUM_CASH_OUT_COMMISSION_AMOUNT,
+                $operation->getCurrency()
+            );
         }
 
         $this->commission = $commission;
@@ -148,7 +160,7 @@ class CommissionCalculationService
             $operation->getCurrency()
         );
 
-        $this->commission = $comm * 0.3;
+        $this->commission = $comm * self::OPERATION_CASH_OUT_COMMISSION_PERCENTAGE;
     }
 
     private function maybeUserHasDiscount(Discount $discount, AbstractOperation $operation)
@@ -177,7 +189,7 @@ class CommissionCalculationService
                 DEFAULT_CURRENCY
             );
 
-            $this->commission = $comm * 0.3;
+            $this->commission = $comm * self::OPERATION_CASH_OUT_COMMISSION_PERCENTAGE;
         }
     }
 
@@ -191,6 +203,6 @@ class CommissionCalculationService
             $operation->getAmount() / 100,
             $operation->getCurrency(),
             DEFAULT_CURRENCY
-        ) * 0.3;
+        ) * self::OPERATION_CASH_OUT_COMMISSION_PERCENTAGE;
     }
 }
