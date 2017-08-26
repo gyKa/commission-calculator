@@ -140,14 +140,14 @@ class CommissionCalculationService
             return;
         }
 
-        $weekOperations = $this->operationRepository->getWeekOperations(
+        $weekOperationsCounter = $this->operationRepository->getWeekOperationsCounter(
             $operation->getDate(),
             $operation->getUser()->getId(),
             $operation->getId()
         );
 
-        $this->maybeApplyDiscount($weekOperations, $operation);
-        $this->maybeApplyRegularCommission($weekOperations, $operation);
+        $this->maybeApplyDiscount($weekOperationsCounter, $operation);
+        $this->maybeApplyRegularCommission($weekOperationsCounter, $operation);
     }
 
     /**
@@ -161,12 +161,12 @@ class CommissionCalculationService
     }
 
     /**
-     * @param array $weekOperations
+     * @param int $weekOperationsCounter
      * @param AbstractOperation $operation
      */
-    private function maybeApplyDiscount(array $weekOperations, AbstractOperation $operation) : void
+    private function maybeApplyDiscount(int $weekOperationsCounter, AbstractOperation $operation) : void
     {
-        if (count($weekOperations) >= 4) {
+        if ($weekOperationsCounter >= 4) {
             return;
         }
 
@@ -180,12 +180,12 @@ class CommissionCalculationService
     }
 
     /**
-     * @param array $weekOperations
+     * @param int $weekOperationsCounter
      * @param AbstractOperation $operation
      */
-    private function maybeApplyRegularCommission(array $weekOperations, AbstractOperation $operation) : void
+    private function maybeApplyRegularCommission(int $weekOperationsCounter, AbstractOperation $operation) : void
     {
-        if (count($weekOperations) <= 3) {
+        if ($weekOperationsCounter <= 3) {
             return;
         }
 

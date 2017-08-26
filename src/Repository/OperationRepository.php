@@ -97,11 +97,11 @@ class OperationRepository
      * @param \DateTime $date
      * @param int $userId
      * @param int $operationId
-     * @return array
+     * @return int
      */
-    public function getWeekOperations(\DateTime $date, int $userId, int $operationId) : array
+    public function getWeekOperationsCounter(\DateTime $date, int $userId, int $operationId) : int
     {
-        $result = [];
+        $result = 0;
 
         $operations = $this->persistence->findAll('operation');
 
@@ -117,7 +117,7 @@ class OperationRepository
             $isOlder = $isOlderByDate && $isOlderInTimeline;
 
             if ($isInCurrentWeek && $isOlder && $operation->isCashOutOperation() && $isSameUser) {
-                $result[] = $operation;
+                $result += 1;
             }
         }
 
